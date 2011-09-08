@@ -139,13 +139,11 @@ int main(int argc,const char **argv){
 	// to the word as read thus far.
 	while((c = fgetc(stdin)) != EOF){
 		switch(state){
-		case 0: if(!isspace(c) && !ispunct(c)){
-				state = 1;
-			} // intentional fall-through
-		case 1: if(!state){
+		case 0: if(isspace(c) || ispunct(c)){
 				break;
 			}
-			if(isspace(c) || ispunct(c)){
+			state = 1; // intentional fall-through
+		case 1: if(isspace(c) || ispunct(c)){
 				state = 0; // assert(cur != &ccdance)
 				if(inc_obj(cur,sentence)){
 					return EXIT_FAILURE;
