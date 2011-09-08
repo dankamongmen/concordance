@@ -170,6 +170,5 @@ int main(int argc,const char **argv){
 		fprintf(stderr,"Error reading input\n");
 		return EXIT_FAILURE;
 	}
-	dump_trie(&ccdance,maxlen);
-	return EXIT_SUCCESS;
+	return dump_trie(&ccdance,maxlen) ? EXIT_FAILURE : EXIT_SUCCESS;
 }
