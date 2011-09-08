@@ -154,7 +154,7 @@ int main(int argc,const char **argv){
 				if(c == '.'){
 					++sentence;
 				}
-			}else if((cur = trie_next(cur,c)) == NULL){
+			}else if((cur = trie_next(cur,isupper(c) ? tolower(c) : c)) == NULL){
 				return EXIT_FAILURE;
 			}
 			++wl;
