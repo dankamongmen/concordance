@@ -125,7 +125,6 @@ int main(int argc,const char **argv){
 			fprintf(stderr,"Unknown state %u\n",state);
 			return EXIT_FAILURE;
 		}
-		fprintf(stderr,"WL: %zu MAX: %zu\n",wl,maxlen);
 	}
 	if(!feof(stdin)){
 		fprintf(stderr,"Error reading input\n");
