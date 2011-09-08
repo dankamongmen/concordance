@@ -74,7 +74,19 @@ dump_trie_rec(const trie *c,unsigned char *pre,int prelen){
 	unsigned z;
 
 	if(c->obj){
-		fprintf(stderr,"%.*s: {%u}\n",prelen,pre,((VALTYPE *)c->obj)->count);
+		unsigned n;
+
+		if(fprintf(stderr,"%.*s: {%u",prelen,pre,((VALTYPE *)c->obj)->count) < 0){
+			return -1;
+		}
+		for(n = 0 ; n < ((VALTYPE *)c->obj)->loccount ; ++n){
+			if(fprintf(stderr,"%c %u",n ? ',' : ':',((VALTYPE *)c->obj)->locs[n]) < 0){
+				return -1;
+			}
+		}
+		if(fprintf(stderr,"}\n") < 0){
+			return -1;
+		}
 	}
 	for(z = 0 ; z < sizeof(c->succ) / sizeof(*c->succ) ; ++z){
 		if(c->succ[z]){

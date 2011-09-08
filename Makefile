@@ -8,6 +8,7 @@ BIN:=$(OUT)/concordance
 
 test: all
 	(cat $(MAKEFILE_LIST) $(wildcard *.c)) | $(BIN)
+	cat README | $(BIN)
 
 all: $(BIN)
 
