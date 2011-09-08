@@ -28,18 +28,42 @@ trie_next(trie *pre,int c){
 	return r;
 }
 
-#define VALTYPE unsigned
+#define VALSTRUCT wordscore
+#define VALTYPE struct VALSTRUCT
+
+typedef VALTYPE { 
+	unsigned count;
+	unsigned *locs;
+	unsigned loccount;
+} VALSTRUCT;
 
 static inline int
-inc_obj(trie *obj){
+add_score(VALTYPE *vt,unsigned sentence){
+	unsigned *tmp;
+
+	if((tmp = realloc(vt->locs,sizeof(*vt->locs) * (vt->loccount + 1))) == NULL){
+		return -1;
+	}
+	vt->locs = tmp;
+	vt->locs[vt->loccount++] = sentence;
+	return 0;
+}
+
+static inline int
+inc_obj(trie *obj,unsigned sentence){
 	if(obj->obj == NULL){
 		if((obj->obj = malloc(sizeof(VALTYPE))) == NULL){
 			fprintf(stderr,"Allocation failure\n");
 			return -1;
 		}
-		*(VALTYPE *)(obj->obj) = 1;
+		((VALTYPE *)obj->obj)->count = 1;
+		((VALTYPE *)obj->obj)->locs = NULL;
+		((VALTYPE *)obj->obj)->loccount = 0;
 	}else{
-		++*(VALTYPE *)(obj->obj);
+		++((VALTYPE *)obj->obj)->count;
+	}
+	if(add_score(obj->obj,sentence)){
+		return -1;
 	}
 	return 0;
 }
@@ -50,7 +74,7 @@ dump_trie_rec(const trie *c,unsigned char *pre,int prelen){
 	unsigned z;
 
 	if(c->obj){
-		fprintf(stderr,"%.*s: {%u}\n",prelen,pre,*(VALTYPE *)(c->obj));
+		fprintf(stderr,"%.*s: {%u}\n",prelen,pre,((VALTYPE *)c->obj)->count);
 	}
 	for(z = 0 ; z < sizeof(c->succ) / sizeof(*c->succ) ; ++z){
 		if(c->succ[z]){
@@ -83,9 +107,9 @@ dump_trie(const trie *ccdance,size_t maxlen){
 // excludes strerror() and friends, so our diagnostics are a bit terse. We
 // don't bother to clean up the trie on exit, whether exceptional or otherwise.
 int main(int argc,const char **argv){
+	unsigned state,sentence;
 	size_t maxlen = 0,wl;
 	struct trie *cur;
-	unsigned state;
 	int c;
 
 	if(argc != 1){
@@ -98,6 +122,7 @@ int main(int argc,const char **argv){
 	state = 0;
 	cur = &ccdance;
 	wl = 0;
+	sentence = 1; // they want 1-indexed sentences
 	// invariant: cur points at a valid trie node, corresponding precisely
 	// to the word as read thus far.
 	while((c = fgetc(stdin)) != EOF){
@@ -110,12 +135,15 @@ int main(int argc,const char **argv){
 			}
 			if(isspace(c) || ispunct(c)){
 				state = 0; // assert(cur != &ccdance)
-				if(inc_obj(cur)){
+				if(inc_obj(cur,sentence)){
 					return EXIT_FAILURE;
 				}
 				cur = &ccdance;
 				maxlen = wl <= maxlen ? maxlen : wl;
 				wl = -1;
+				if(c == '.'){
+					++sentence;
+				}
 			}else if((cur = trie_next(cur,c)) == NULL){
 				return EXIT_FAILURE;
 			}
