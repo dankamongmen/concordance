@@ -8,8 +8,8 @@
 
 // We hold the concordance in a classic trie over the native alphabet.
 typedef struct trie {
-	struct trie *succ[SIGMA];
 	void *obj;
+	struct trie *succ[SIGMA];
 } trie;
 
 // ccdance->obj is object corresponding to empty string
