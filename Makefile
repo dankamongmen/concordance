@@ -7,7 +7,7 @@ OUT:=out
 BIN:=$(OUT)/concordance
 
 test: all
-	$(BIN)
+	(cat $(MAKEFILE_LIST) $(wildcard *.c)) | $(BIN)
 
 all: $(BIN)
 
